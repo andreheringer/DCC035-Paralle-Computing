@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
+#include <sys/time.h>
 #include "primes.h"
 
 
@@ -15,9 +15,10 @@ int main(int argc, char const *argv[]) {
     const char mode = *argv[2];
     int thread_number = atoi(argv[3]);
 
-    int* primes = alloc_primes(array_size);
+    char* primes = alloc_primes(array_size);
 
-    clock_t start_time = clock();
+    struct timeval start_time;
+    gettimeofday(&start_time, NULL);
     
     if (thread_number < 2) {
         primes = find_primes(primes, array_size);
@@ -26,14 +27,15 @@ int main(int argc, char const *argv[]) {
         parallel_find_primes(primes, array_size, thread_number);
     }
     
-    clock_t end_time = clock();
+    struct timeval end_time;
+    gettimeofday(&end_time, NULL);
     
     if (mode == 'l' || mode == 'a') {
         print_primes(primes, array_size);
     }
     
     if (mode == 't' || mode == 'a') {
-        printf("%.6lf\n", (double)(end_time - start_time) / CLOCKS_PER_SEC);
+        printf("%.6f\n", ((end_time.tv_sec - start_time.tv_sec) * 1000000u + end_time.tv_usec - start_time.tv_usec) / 1e6);
     }
     
     free_primes(primes);

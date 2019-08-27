@@ -3,16 +3,16 @@
 #include <omp.h>
 #include "primes.h"
 
-void free_primes(int *array) {
+void free_primes(char *array) {
     free(array);
 }
 
-int *alloc_primes(int size) {
-    int *new_array = calloc(sizeof(int), size);
+char *alloc_primes(int size) {
+    char *new_array = calloc(sizeof(char), size);
     return new_array;
 }
 
-int* calculate_multiples(int *array, int begin, int size) {
+char* calculate_multiples(char *array, int begin, int size) {
 
     int prime_key = begin;
     begin++;
@@ -26,7 +26,7 @@ int* calculate_multiples(int *array, int begin, int size) {
 
 }
 
-void parallel_find_primes(int *array, int size, int num_threads) {
+void parallel_find_primes(char *array, int size, int num_threads) {
 
     #pragma omp parallel for num_threads(num_threads) schedule(static, 1)
     for (int i = PRIMES_OFFSET; i < size; i++) {
@@ -34,7 +34,7 @@ void parallel_find_primes(int *array, int size, int num_threads) {
     }
 }
 
-int *find_primes(int *array, int size) {
+char *find_primes(char *array, int size) {
 
     for (int i = PRIMES_OFFSET; i < size; i++) {
         calculate_multiples(array, i, size);
@@ -43,7 +43,7 @@ int *find_primes(int *array, int size) {
     return array;
 }
 
-void print_primes(int* array, int size) {
+void print_primes(char* array, int size) {
     
     for (int i = PRIMES_OFFSET; i < size; i++) {
         if(!array[i]) {
