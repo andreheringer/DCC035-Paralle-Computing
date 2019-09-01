@@ -4,6 +4,7 @@ CC = gcc
  
 CFLAGS = -g -Wall -fopenmp
 
+RFLAGS = -fopenmp
 
 # Parametros de Projeto
 
@@ -28,6 +29,13 @@ build/%.o: src/%.c
 	@echo "- Compilando objeto \"$@\""
 	@$(CC) -c $(CFLAGS) $< -o $@
 
+
+# Release
+
+
+release: $(OBJS)
+	@echo "Building release candidate"
+	@$(CC) $(RFLAGS) $(OBJS) -o ../release/primes
 
 # Auxiliares
 
