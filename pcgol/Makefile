@@ -2,21 +2,21 @@
 
 CC = gcc
  
-CFLAGS = -g -Wall -fopenmp
+CFLAGS = -g -std=c11 -Wall -Wextra -pedantic
 
-RFLAGS = -fopenmp
+RFLAGS = 
 
 # Parametros de Projeto
 
-SRC = main.c primes.c
+SRC = pcgol.c cell.c board.c
 
 OBJS = $(SRC:%.c=build/%.o)
 
-primes: bin/primes
+pcgol: bin/pcgol
 
-bin/primes: $(OBJS)
+bin/pcgol: $(OBJS)
 	@echo "+ Compilando programa \"$@\""
-	@$(CC) $(CFLAGS) $(OBJS) -o bin/primes
+	@$(CC) $(CFLAGS) $(OBJS) -o bin/pcgol
 
 
 # Objetos
