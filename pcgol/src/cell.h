@@ -12,7 +12,7 @@ typedef struct cell {
     int64_t pos_x;
     int64_t pos_y;
     cellState state;
-    cell * hood[8];
+    struct cell * hood[8];
 } cell;
 
 
