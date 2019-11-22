@@ -2,13 +2,13 @@
 
 CC = gcc
  
-CFLAGS = -g -std=c11 -Wall -Wextra -pedantic
+CFLAGS = -g -std=c11 -Wall -Wextra -pedantic -lGL -lGLU -lglut
 
 RFLAGS = 
 
 # Parametros de Projeto
 
-SRC = pcgol.c cell.c board.c
+SRC = pcgol.c cell.c board.c display.c
 
 OBJS = $(SRC:%.c=build/%.o)
 
@@ -16,7 +16,7 @@ pcgol: bin/pcgol
 
 bin/pcgol: $(OBJS)
 	@echo "+ Compilando programa \"$@\""
-	@$(CC) $(CFLAGS) $(OBJS) -o bin/pcgol
+	@$(CC) $(OBJS) -o bin/pcgol $(CFLAGS)
 
 
 # Objetos
