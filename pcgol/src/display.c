@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 #include <stdbool.h>
 #include "display.h"
 #include "board.h"
@@ -12,12 +13,13 @@ int cellSize;
 
 void displayInit(board * aux_board){
     this_board = aux_board;
-    cellSize = 400/this_board->x_axis; //trocar 800 por tamanho da tela
+    cellSize = 400/this_board->x_axis; //trocar 400 por tamanho da tela (?)
 
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
     glutInitWindowSize(800, 600);
     glutCreateWindow("Jogo da Vida de Conway");
     glutDisplayFunc(drawBoard);
+    glutTimerFunc(1000, timer, 0);
 
     glClearColor(1.0, 1.0, 1.0, 0.0);
     glColor3f(0.0f, 0.0f, 0.0f);
@@ -29,10 +31,11 @@ void displayInit(board * aux_board){
 void drawBoard(){
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glColor3f(0.2, 0.8, 0.8);
-    glPointSize(1.0);
-
     srand(time(NULL));
+    float r = (float)(rand() % 100) / 100;
+
+    glColor3f(0.2, 0.8, r);
+    glPointSize(1.0);
 
     for (int i = 0; i < this_board->y_axis; i++) {
         for (int j = 0; j < this_board->x_axis; j++) {
@@ -51,7 +54,8 @@ void drawBoard(){
         }
     }
 
-    glFlush();
+    //glFlush();
+    glutSwapBuffers();
 }
 
 void drawCell(int x, int y, bool active){
@@ -65,4 +69,10 @@ void drawCell(int x, int y, bool active){
     glVertex2i(x + cellSize, y + cellSize);
     glVertex2i(x + cellSize, y);
     glEnd();
+}
+
+void timer(){
+    glutPostRedisplay();
+    //printf("called\n");
+    glutTimerFunc(1000/60, timer, 0);
 }
