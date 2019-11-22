@@ -8,12 +8,16 @@
 #include "display.h"
 #include "board.h"
 
+#define BOARD_SIZE 400
+#define SHIFT_X 130
+#define SHIFT_Y 50
+
 board* this_board;
 int cellSize;
 
 void displayInit(board * aux_board){
     this_board = aux_board;
-    cellSize = 400/this_board->x_axis; //trocar 400 por tamanho da tela (?)
+    cellSize = BOARD_SIZE/this_board->x_axis;
 
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
     glutInitWindowSize(800, 600);
@@ -31,32 +35,18 @@ void displayInit(board * aux_board){
 void drawBoard(){
     glClear(GL_COLOR_BUFFER_BIT);
 
-    srand(time(NULL));
-    float cor = (float)(rand() % 100) / 100;
-
-    glColor3f(0.2, 0.8, cor);
+    glColor3f(0.2, 0.8, 0.8);
     glPointSize(1.0);
-
-    //preenche posicoes aleatorias do board
-    for (int i = 0; i < this_board->y_axis; i++) {
-        for (int j = 0; j < this_board->x_axis; j++) {
-            int r = rand() % 100;
-            if(r % 2 == 0){
-                set_cell_state(this_board->data[j][i], ALIVE);
-            } else {
-                set_cell_state(this_board->data[j][i], DEAD);
-            }
-        }
-    }
 
     //desenha o board
     for (int i = 0; i < this_board->y_axis; i++) {
         for (int j = 0; j < this_board->x_axis; j++) {
-            drawCell(130 + j*cellSize, 50 + i*cellSize, get_cell_state(this_board->data[i][j]) ? true : false);
+            //constrói o board de baixo pra cima.
+            //mudar caso necessário
+            drawCell(SHIFT_X + j*cellSize, SHIFT_Y + i*cellSize, get_cell_state(this_board->data[i][j]) ? true : false);
         }
     }
 
-    //glFlush();
     glutSwapBuffers();
 }
 
@@ -75,6 +65,5 @@ void drawCell(int x, int y, bool active){
 
 void update(){
     glutPostRedisplay();
-    //printf("called\n");
     glutTimerFunc(1000/60, update, 0);
 }
