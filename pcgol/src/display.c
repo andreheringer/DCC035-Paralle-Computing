@@ -11,6 +11,7 @@
 #define BOARD_SIZE 400
 #define SHIFT_X 130
 #define SHIFT_Y 50
+#define FPS 2
 
 board* this_board;
 int cellSize;
@@ -65,5 +66,5 @@ void drawCell(int x, int y, bool active){
 
 void update(){
     glutPostRedisplay();
-    glutTimerFunc(1000/60, update, 0);
+    glutTimerFunc(1000/FPS, update, 0);
 }
