@@ -1,6 +1,6 @@
 ## Game of life paralelo
 
-A ideia do traalho é imlementar o jogo da vida de Cohen de 
+A ideia do trabalho é implementar o jogo da vida de Conway de 
 maneira paralela.
 
 Links uteis:
