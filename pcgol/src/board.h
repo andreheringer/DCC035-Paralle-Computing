@@ -9,12 +9,12 @@ typedef struct board
     int64_t y_axis;
     cell *** data;
 
-}board;
+} Board;
 
 //All functions that return a board ptr
-board * new_board(int64_t, int64_t);
+Board * new_board(int64_t, int64_t);
 
 
 //All functions that receive a board pointer
-void render_board(board * this_board);
-void update_board(board * this_board, cell ** living_cells);
+//void _render_board(Board * this_board);
+void update_board_state(Board * this_board);
