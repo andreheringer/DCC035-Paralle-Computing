@@ -9,6 +9,14 @@
 #include "display.h"
 //#include "rules.h"
 
+/*
+    Dependencias:
+    1. OpenGL libraries:
+    $ sudo apt-get install mesa-utils
+    2. freeGlut:
+    $ sudo apt-get install freeglut3-dev
+*/
+
 int main(int argc, char *argv[]) {
     int_fast64_t auz = (int_fast64_t) atoi(argv[1]);
     printf("Yo, here a board...\n");
