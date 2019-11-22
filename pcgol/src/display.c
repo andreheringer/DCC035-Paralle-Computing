@@ -8,11 +8,17 @@
 #include "display.h"
 #include "board.h"
 
-#define BOARD_SIZE 400
-#define SHIFT_X 130
-#define SHIFT_Y 50
-#define FPS 2
+#define BOARD_SIZE 400 //valor em pixels
+#define SHIFT_X 130 //quantidade de pixels que o board é deslocado pra direita
+#define SHIFT_Y 50 //quantidade de pixels que o board é deslocado pra cima
+#define FPS 2 //taxa em que o board é desenhado na tela (frames por segundo)
 
+//altura e largura da janela.
+//não recomendo mudar pois o openGL é meio bugado com relação à isso
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
+
+//declaração global do board pois a função de display não aceita parâmetros
 board* this_board;
 int cellSize;
 
@@ -20,11 +26,11 @@ void displayInit(board * aux_board){
     this_board = aux_board;
     cellSize = BOARD_SIZE/this_board->x_axis;
 
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-    glutInitWindowSize(800, 600);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     glutCreateWindow("Jogo da Vida de Conway");
     glutDisplayFunc(drawBoard);
-    glutTimerFunc(1000, update, 0);
+    glutTimerFunc(1000, refresh, 0);
 
     glClearColor(1.0, 1.0, 1.0, 0.0);
     glColor3f(0.0f, 0.0f, 0.0f);
@@ -42,7 +48,7 @@ void drawBoard(){
     //desenha o board
     for (int i = 0; i < this_board->y_axis; i++) {
         for (int j = 0; j < this_board->x_axis; j++) {
-            //constrói o board de baixo pra cima.
+            //constrói o board de baixo pra cima (padrão do glut)
             //mudar caso necessário
             drawCell(SHIFT_X + j*cellSize, SHIFT_Y + i*cellSize, get_cell_state(this_board->data[i][j]) ? true : false);
         }
@@ -64,7 +70,7 @@ void drawCell(int x, int y, bool active){
     glEnd();
 }
 
-void update(){
+void refresh(){
     glutPostRedisplay();
-    glutTimerFunc(1000/FPS, update, 0);
+    glutTimerFunc(1000/FPS, refresh, 0);
 }
