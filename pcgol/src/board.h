@@ -17,4 +17,7 @@ Board * new_board(int64_t, int64_t);
 
 //All functions that receive a board pointer
 //void _render_board(Board * this_board);
-void update_board_state(Board * this_board);
+void update_board_state(Board * this_board, cellState* living_cells);
+
+//Cell state aux vector
+cellState * new_cell_state_vec(int64_t size);

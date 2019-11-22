@@ -16,12 +16,14 @@
 #define FPS 2
 
 //declaração global do board pois a função de display não aceita parâmetros
-board* this_board;
+Board* glob_board;
+cellState* glob_cell_state_vec;
 int cellSize;
 
-void displayInit(board * aux_board){
-    this_board = aux_board;
-    cellSize = WINDOW_HEIGHT/this_board->y_axis;
+void displayInit(Board * aux_board, cellState * aux_cell_state_vec) {
+    glob_board = aux_board;
+    glob_cell_state_vec = aux_cell_state_vec;
+    cellSize = WINDOW_HEIGHT/glob_board->y_axis;
 
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -36,7 +38,7 @@ void displayInit(board * aux_board){
     gluOrtho2D(0.0, WINDOW_WIDTH, 0.0, WINDOW_HEIGHT);
 }
 
-void drawBoard(){
+void drawBoard() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     //cor do board (rgb)
@@ -45,20 +47,20 @@ void drawBoard(){
 
     //desenha o board
     //actually pode até ser paralelisado
-    for (int i = 0; i < this_board->y_axis; i++) {
-        for (int j = 0; j < this_board->x_axis; j++) {
+    for (int i = 0; i < glob_board->y_axis; i++) {
+        for (int j = 0; j < glob_board->x_axis; j++) {
             //constrói o board de baixo pra cima (padrão do glut)
             //mudar caso necessário
-            drawCell((WINDOW_WIDTH - WINDOW_HEIGHT)/2 + WINDOW_HEIGHT%this_board->y_axis/2 + j*cellSize,
-                     WINDOW_HEIGHT%this_board->y_axis/2 + i*cellSize,
-                     get_cell_state(this_board->data[i][j]) ? true : false);
+            drawCell((WINDOW_WIDTH - WINDOW_HEIGHT)/2 + WINDOW_HEIGHT%glob_board->y_axis/2 + j*cellSize,
+                     WINDOW_HEIGHT%glob_board->y_axis/2 + i*cellSize,
+                     get_cell_state(glob_board->data[i][j]) ? true : false);
         }
     }
 
     glutSwapBuffers();
 }
 
-void drawCell(int x, int y, bool active){
+void drawCell(int x, int y, bool active) {
     if(active){
         glBegin(GL_POLYGON);
     } else {

@@ -18,9 +18,10 @@
 */
 
 int main(int argc, char *argv[]) {
-    int_fast64_t auz = (int_fast64_t) atoi(argv[1]);
+    int64_t auz = (int64_t) atoi(argv[1]);
     printf("Yo, here a board...\n");
-    board * aBoard = new_board(auz, auz);
+    Board * aBoard = new_board(auz, auz);
+    cellState* cell_state_vec = new_cell_state_vec(auz*auz);
     //render_board(aBoard);
 
     glutInit(&argc, argv);
