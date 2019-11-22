@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
     //render_board(aBoard);
 
     glutInit(&argc, argv);
-    displayInit(aBoard);
+    displayInit(aBoard, cell_state_vec);
     glutMainLoop();
 
     return 0;
