@@ -25,6 +25,9 @@ void displayInit(Board * aux_board, cellState * aux_cell_state_vec) {
     glob_cell_state_vec = aux_cell_state_vec;
     cellSize = WINDOW_HEIGHT/glob_board->y_axis;
 
+    //preenche estado inicial do board aleatoriamente
+    fillBoard();
+
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     glutCreateWindow("Jogo da Vida de Conway");
@@ -76,5 +79,20 @@ void drawCell(int x, int y, bool active) {
 void refresh(){
     glutPostRedisplay();
     glutTimerFunc(1000/FPS, refresh, 0);
-    //processar iterações do jogo aqui
+
+    update_board_state(glob_board, glob_cell_state_vec);
+}
+
+void fillBoard(){
+    srand(time(NULL));
+    for (int i = 0; i < glob_board->y_axis; i++) {
+        for (int j = 0; j < glob_board->x_axis; j++) {
+            int r = rand() % 100;
+            if(r < 40){
+                set_cell_state(glob_board->data[i][j], ALIVE);
+            } else {
+                set_cell_state(glob_board->data[i][j], DEAD);
+            }
+        }
+    }
 }

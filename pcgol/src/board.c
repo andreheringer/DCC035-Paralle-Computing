@@ -6,7 +6,6 @@
 #include "cell.h"
 #include "board.h"
 
-
 void _link_board(Board * this_board) {
     
     for (int64_t i = 0; i < this_board->y_axis; i++) {

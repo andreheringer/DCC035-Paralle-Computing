@@ -7,3 +7,5 @@ void drawBoard();
 void drawCell(int x, int y, bool active);
 
 void refresh();
+
+void fillBoard();
