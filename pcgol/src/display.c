@@ -19,7 +19,7 @@ void displayInit(board * aux_board){
     glutInitWindowSize(800, 600);
     glutCreateWindow("Jogo da Vida de Conway");
     glutDisplayFunc(drawBoard);
-    glutTimerFunc(1000, timer, 0);
+    glutTimerFunc(1000, update, 0);
 
     glClearColor(1.0, 1.0, 1.0, 0.0);
     glColor3f(0.0f, 0.0f, 0.0f);
@@ -32,11 +32,12 @@ void drawBoard(){
     glClear(GL_COLOR_BUFFER_BIT);
 
     srand(time(NULL));
-    float r = (float)(rand() % 100) / 100;
+    float cor = (float)(rand() % 100) / 100;
 
-    glColor3f(0.2, 0.8, r);
+    glColor3f(0.2, 0.8, cor);
     glPointSize(1.0);
 
+    //preenche posicoes aleatorias do board
     for (int i = 0; i < this_board->y_axis; i++) {
         for (int j = 0; j < this_board->x_axis; j++) {
             int r = rand() % 100;
@@ -48,6 +49,7 @@ void drawBoard(){
         }
     }
 
+    //desenha o board
     for (int i = 0; i < this_board->y_axis; i++) {
         for (int j = 0; j < this_board->x_axis; j++) {
             drawCell(130 + j*cellSize, 50 + i*cellSize, get_cell_state(this_board->data[i][j]) ? true : false);
@@ -71,8 +73,8 @@ void drawCell(int x, int y, bool active){
     glEnd();
 }
 
-void timer(){
+void update(){
     glutPostRedisplay();
     //printf("called\n");
-    glutTimerFunc(1000/60, timer, 0);
+    glutTimerFunc(1000/60, update, 0);
 }
