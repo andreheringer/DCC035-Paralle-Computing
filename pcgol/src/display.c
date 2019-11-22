@@ -8,15 +8,12 @@
 #include "display.h"
 #include "board.h"
 
-#define BOARD_SIZE 400 //valor em pixels
-#define SHIFT_X 130 //quantidade de pixels que o board é deslocado pra direita
-#define SHIFT_Y 50 //quantidade de pixels que o board é deslocado pra cima
-#define FPS 2 //taxa em que o board é desenhado na tela (frames por segundo)
-
-//altura e largura da janela.
-//não recomendo mudar pois o openGL é meio bugado com relação à isso
+//altura e largura da janela
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
+
+//taxa em que o board é desenhado na tela (frames por segundo)
+#define FPS 2
 
 //declaração global do board pois a função de display não aceita parâmetros
 board* this_board;
@@ -24,7 +21,7 @@ int cellSize;
 
 void displayInit(board * aux_board){
     this_board = aux_board;
-    cellSize = BOARD_SIZE/this_board->x_axis;
+    cellSize = WINDOW_HEIGHT/this_board->y_axis;
 
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -36,21 +33,25 @@ void displayInit(board * aux_board){
     glColor3f(0.0f, 0.0f, 0.0f);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(0.0, 640.0, 0.0, 480.0);
+    gluOrtho2D(0.0, WINDOW_WIDTH, 0.0, WINDOW_HEIGHT);
 }
 
 void drawBoard(){
     glClear(GL_COLOR_BUFFER_BIT);
 
+    //cor do board (rgb)
     glColor3f(0.2, 0.8, 0.8);
     glPointSize(1.0);
 
     //desenha o board
+    //actually pode até ser paralelisado
     for (int i = 0; i < this_board->y_axis; i++) {
         for (int j = 0; j < this_board->x_axis; j++) {
             //constrói o board de baixo pra cima (padrão do glut)
             //mudar caso necessário
-            drawCell(SHIFT_X + j*cellSize, SHIFT_Y + i*cellSize, get_cell_state(this_board->data[i][j]) ? true : false);
+            drawCell((WINDOW_WIDTH - WINDOW_HEIGHT)/2 + WINDOW_HEIGHT%this_board->y_axis/2 + j*cellSize,
+                     WINDOW_HEIGHT%this_board->y_axis/2 + i*cellSize,
+                     get_cell_state(this_board->data[i][j]) ? true : false);
         }
     }
 
@@ -73,4 +74,5 @@ void drawCell(int x, int y, bool active){
 void refresh(){
     glutPostRedisplay();
     glutTimerFunc(1000/FPS, refresh, 0);
+    //processar iterações do jogo aqui
 }
