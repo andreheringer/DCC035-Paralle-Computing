@@ -90,8 +90,8 @@ cellState* compute_next_board_state(Board * this_board) {
                 }
             }
             else {
-                if (living_hood == 2 || living_hood == 3) {
-                    alive_cells[i*this_board->x_axis + j] =ALIVE;
+                if (living_hood == 3) {
+                    alive_cells[i*this_board->x_axis + j] = ALIVE;
                 }
             }
         }
