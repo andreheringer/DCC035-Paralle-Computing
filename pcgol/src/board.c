@@ -7,7 +7,7 @@
 #include "board.h"
 
 
-void _link_board(board * this_board) {
+void _link_board(Board * this_board) {
     
     for (int64_t i = 0; i < this_board->y_axis; i++) {
         
@@ -36,9 +36,9 @@ void _link_board(board * this_board) {
 
 }
 
-board * new_board(int64_t x_axis, int64_t y_axis) {
+Board * new_board(int64_t x_axis, int64_t y_axis) {
     
-    board * this_board = (board *) calloc(1, sizeof(board));
+    Board * this_board = (Board *) calloc(1, sizeof(Board));
     
     this_board->x_axis = x_axis;
     this_board->y_axis = y_axis;
@@ -61,7 +61,7 @@ board * new_board(int64_t x_axis, int64_t y_axis) {
     return this_board;
 }
 
-void render_board(board * this_board) {
+void _render_board(Board * this_board) {
     
     for (int64_t i = 0; i < this_board->y_axis; i++) {
         
@@ -74,8 +74,44 @@ void render_board(board * this_board) {
 
 }
 
-void update_board(board * this_board, cell ** cells) {
-    for (int_fast64_t i = 0; i < len(cells); i++) {
-        set_cell_state(this_board->data[cells[i]->pos_y][cells[i]->pos_x], ALIVE); 
+cellState* compute_next_board_state(Board * this_board) {
+    cellState* alive_cells;
+    alive_cells = (cell *)calloc(this_board->x_axis*this_board->x_axis, sizeof(cellState));
+    
+
+    for (int64_t i = 0; i < this_board->y_axis; i++) {
+        for (int64_t j = 0; j < this_board->x_axis; j++) {
+            
+            int8_t living_hood = num_cell_hood(this_board->data[i][j]);
+            
+            if (get_cell_state(this_board->data[i][j]) == ALIVE) {
+                if (living_hood == 2 || living_hood == 3) {
+                    alive_cells[i*this_board->x_axis + j] = ALIVE;
+                }
+            }
+            else {
+                if (living_hood == 2 || living_hood == 3) {
+                    alive_cells[i*this_board->x_axis + j] =ALIVE;
+                }
+            }
+        }
     }
+
+    return alive_cells;
+}
+
+void update_board_state(Board * this_board) {
+
+    cellState* living_cells = compute_next_board_state(this_board);
+    
+    for (int64_t i = 0; i < len(living_cells); i++) {
+        
+        int64_t cur_cell_y = i / this_board->y_axis;
+        int64_t cur_cell_x = i % this_board->x_axis;
+        
+        if (living_cells[i] != NULL) {
+            set_cell_state(this_board->data[cur_cell_y][cur_cell_x], living_cells[i]);
+        }
+    }
+    
 }
