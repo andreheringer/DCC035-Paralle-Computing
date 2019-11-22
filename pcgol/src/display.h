@@ -1,6 +1,6 @@
 #include "board.h"
 
-void displayInit(board * this_board);
+void displayInit(Board * this_board, cellState* aux_vec);
 
 void drawBoard();
 

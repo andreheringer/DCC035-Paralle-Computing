@@ -30,13 +30,6 @@ build/%.o: src/%.c
 	@$(CC) -c $(CFLAGS) $< -o $@
 
 
-# Release
-
-
-release: $(OBJS)
-	@echo "Building release candidate"
-	@$(CC) $(RFLAGS) $(OBJS) -o release/primes
-
 # Auxiliares
 
 clean:
