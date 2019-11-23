@@ -116,8 +116,8 @@ void _compute_next_board_state(Board * this_board, cellState* alive_cells) {
 
 void* _parallel_compute_next_board_state(void* arg){
     Thread_arg* targ = (Thread_arg*)arg;
-    Board * thread_board_ref = targ->t_board;
-    cellState * thread_cell_state_vec_ref = targ->t_cell_state_vec;
+    Board* thread_board_ref = targ->t_board;
+    cellState* thread_cell_state_vec_ref = targ->t_cell_state_vec;
     int offset = targ->offset;
     int num_threads = targ->num_threads;
 
@@ -143,7 +143,24 @@ void* _parallel_compute_next_board_state(void* arg){
     return NULL;
 }
 
-void update_board_state(Board * this_board, cellState* living_cells) {
+void* _parallel_set_board_cells(void* arg){
+    Thread_arg* targ = (Thread_arg*)arg;
+    Board* thread_board_ref = targ->t_board;
+    cellState* thread_cell_state_vec_ref = targ->t_cell_state_vec;
+    int offset = targ->offset;
+    int num_threads = targ->num_threads;
+
+    for (int64_t i = offset; i < thread_board_ref->x_axis*thread_board_ref->x_axis; i+=num_threads) {
+        int64_t cur_cell_y = i / thread_board_ref->y_axis;
+        int64_t cur_cell_x = i % thread_board_ref->x_axis;
+        set_cell_state(thread_board_ref->data[cur_cell_y][cur_cell_x], thread_cell_state_vec_ref[i]);
+    }
+
+    free(arg);
+    return NULL;
+}
+
+void update_board_state(Board* this_board, cellState* living_cells) {
     int num_threads = NUM_THREADS;
 
     if(num_threads){
@@ -165,14 +182,28 @@ void update_board_state(Board * this_board, cellState* living_cells) {
         for(int i = 0; i < num_threads; i++){
             pthread_join(t[i], NULL);
         }
+
+        for(int i = 0; i < num_threads; i++){
+            Thread_arg* targ = (Thread_arg *)malloc(sizeof(Thread_arg));
+            targ->t_board = this_board;
+            targ->t_cell_state_vec = living_cells;
+            targ->offset = i;
+            targ->num_threads = num_threads;
+
+            pthread_create(&t[i], NULL, _parallel_set_board_cells, (void *)targ);
+        }
+
+        for(int i = 0; i < num_threads; i++){
+            pthread_join(t[i], NULL);
+        }
     } else {
         //sequencial
         _compute_next_board_state(this_board, living_cells);
-    }
 
-    for (int64_t i = 0; i < this_board->x_axis*this_board->x_axis; i++) {
-        int64_t cur_cell_y = i / this_board->y_axis;
-        int64_t cur_cell_x = i % this_board->x_axis;
-        set_cell_state(this_board->data[cur_cell_y][cur_cell_x], living_cells[i]);
+        for (int64_t i = 0; i < this_board->x_axis*this_board->x_axis; i++) {
+            int64_t cur_cell_y = i / this_board->y_axis;
+            int64_t cur_cell_x = i % this_board->x_axis;
+            set_cell_state(this_board->data[cur_cell_y][cur_cell_x], living_cells[i]);
+        }
     }
 }
