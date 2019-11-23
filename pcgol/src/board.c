@@ -36,8 +36,7 @@ void _link_board(Board * this_board) {
 }
 
 cellState * new_cell_state_vec(int64_t size) {
-    cellState* alive_cells;
-    alive_cells = (cell *)calloc(size, sizeof(cellState));
+    cellState* alive_cells = (cellState *)malloc(size * sizeof(cellState));
     return alive_cells;
 }
 
@@ -80,15 +79,15 @@ void _render_board(Board * this_board) {
 
 }
 
-void _kill_all(cellState* cells) {
-    for (int i = 0; i < len(cells); i++) {
+void _kill_all(cellState* cells, int size) {
+    for (int i = 0; i < size; i++) {
         cells[i] = DEAD;
     }
 }
 
 void _compute_next_board_state(Board * this_board, cellState* alive_cells) {
     
-    _kill_all(alive_cells);
+    _kill_all(alive_cells, this_board->x_axis*this_board->x_axis);
     for (int64_t i = 0; i < this_board->y_axis; i++) {
         for (int64_t j = 0; j < this_board->x_axis; j++) {
             
@@ -112,7 +111,7 @@ void _compute_next_board_state(Board * this_board, cellState* alive_cells) {
 
 void update_board_state(Board * this_board, cellState* living_cells) {
     _compute_next_board_state(this_board, living_cells);
-    for (int64_t i = 0; i < len(living_cells); i++) {
+    for (int64_t i = 0; i < this_board->x_axis*this_board->x_axis; i++) {
         int64_t cur_cell_y = i / this_board->y_axis;
         int64_t cur_cell_x = i % this_board->x_axis;
         set_cell_state(this_board->data[cur_cell_y][cur_cell_x], living_cells[i]);
