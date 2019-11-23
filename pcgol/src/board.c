@@ -2,9 +2,13 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint-gcc.h>
+#include <pthread.h>
 #include "utils.h"
 #include "cell.h"
 #include "board.h"
+
+//numero de threads
+#define NUM_THREADS 4
 
 void _link_board(Board * this_board) {
 
@@ -110,8 +114,62 @@ void _compute_next_board_state(Board * this_board, cellState* alive_cells) {
     return;
 }
 
+void* _parallel_compute_next_board_state(void* arg){
+    Thread_arg* targ = (Thread_arg*)arg;
+    Board * thread_board_ref = targ->t_board;
+    cellState * thread_cell_state_vec_ref = targ->t_cell_state_vec;
+    int offset = targ->offset;
+    int num_threads = targ->num_threads;
+
+    for (int64_t i = 0; i < thread_board_ref->y_axis; i++) {
+        for (int64_t j = offset; j < thread_board_ref->x_axis; j+=num_threads) {
+
+            int8_t living_hood = num_cell_hood(thread_board_ref->data[i][j]);
+            
+            if (get_cell_state(thread_board_ref->data[i][j]) == ALIVE) {
+                if (living_hood == 2 || living_hood == 3) {
+                    thread_cell_state_vec_ref[i*thread_board_ref->x_axis + j] = ALIVE;
+                }
+            }
+            else {
+                if (living_hood == 3) {
+                    thread_cell_state_vec_ref[i*thread_board_ref->x_axis + j] = ALIVE;
+                }
+            }
+        }
+    }
+
+    free(arg);
+    return NULL;
+}
+
 void update_board_state(Board * this_board, cellState* living_cells) {
-    _compute_next_board_state(this_board, living_cells);
+    int num_threads = NUM_THREADS;
+
+    if(num_threads){
+        //paralelo
+        pthread_t t[num_threads];
+
+        _kill_all(living_cells, this_board->x_axis*this_board->x_axis);
+
+        for(int i = 0; i < num_threads; i++){
+            Thread_arg* targ = (Thread_arg *)malloc(sizeof(Thread_arg));
+            targ->t_board = this_board;
+            targ->t_cell_state_vec = living_cells;
+            targ->offset = i;
+            targ->num_threads = num_threads;
+
+            pthread_create(&t[i], NULL, _parallel_compute_next_board_state, (void *)targ);
+        }
+
+        for(int i = 0; i < num_threads; i++){
+            pthread_join(t[i], NULL);
+        }
+    } else {
+        //sequencial
+        _compute_next_board_state(this_board, living_cells);
+    }
+
     for (int64_t i = 0; i < this_board->x_axis*this_board->x_axis; i++) {
         int64_t cur_cell_y = i / this_board->y_axis;
         int64_t cur_cell_x = i % this_board->x_axis;
