@@ -7,6 +7,9 @@
 #include "cell.h"
 #include "board.h"
 
+//numero de threads
+#define NUM_THREADS 4
+
 void _link_board(Board * this_board) {
 
     for (int64_t i = 0; i < this_board->y_axis; i++) {
@@ -141,27 +144,30 @@ void* _parallel_compute_next_board_state(void* arg){
 }
 
 void update_board_state(Board * this_board, cellState* living_cells) {
-    //sequencial
-    //_compute_next_board_state(this_board, living_cells);
+    int num_threads = NUM_THREADS;
 
-    //paralelo
-    int num_threads = 4;
-    pthread_t t[num_threads];
+    if(num_threads){
+        //paralelo
+        pthread_t t[num_threads];
 
-    _kill_all(living_cells, this_board->x_axis*this_board->x_axis);
+        _kill_all(living_cells, this_board->x_axis*this_board->x_axis);
 
-    for(int i = 0; i < num_threads; i++){
-        Thread_arg* targ = (Thread_arg *)malloc(sizeof(Thread_arg));
-        targ->t_board = this_board;
-        targ->t_cell_state_vec = living_cells;
-        targ->offset = i;
-        targ->num_threads = num_threads;
+        for(int i = 0; i < num_threads; i++){
+            Thread_arg* targ = (Thread_arg *)malloc(sizeof(Thread_arg));
+            targ->t_board = this_board;
+            targ->t_cell_state_vec = living_cells;
+            targ->offset = i;
+            targ->num_threads = num_threads;
 
-        pthread_create(&t[i], NULL, _parallel_compute_next_board_state, (void *)targ);
-    }
+            pthread_create(&t[i], NULL, _parallel_compute_next_board_state, (void *)targ);
+        }
 
-    for(int i = 0; i < num_threads; i++){
-        pthread_join(t[i], NULL);
+        for(int i = 0; i < num_threads; i++){
+            pthread_join(t[i], NULL);
+        }
+    } else {
+        //sequencial
+        _compute_next_board_state(this_board, living_cells);
     }
 
     for (int64_t i = 0; i < this_board->x_axis*this_board->x_axis; i++) {
