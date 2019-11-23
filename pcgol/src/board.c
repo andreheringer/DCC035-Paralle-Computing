@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint-gcc.h>
+#include <pthread.h>
 #include "utils.h"
 #include "cell.h"
 #include "board.h"
@@ -89,21 +90,32 @@ void _compute_next_board_state(Board * this_board, cellState* alive_cells) {
 
     _kill_all(alive_cells, this_board->x_axis*this_board->x_axis);
 
+    //paralelismo
+    int num_threads = 2;
+    pthread_t t[num_threads];
+
     for (int64_t i = 0; i < this_board->y_axis; i++) {
         for (int64_t j = 0; j < this_board->x_axis; j++) {
+            Thread_arg* t_arg = (Thread_arg *)malloc(sizeof(Thread_arg));
+            t_arg->this_board = this_board;
+            t_arg->alive_cell = alive_cells[i*this_board->x_axis + j];
+            t_arg->i = i;
+            t_arg->j = j;
 
-            int8_t living_hood = num_cell_hood(this_board->data[i][j]);
-            
-            if (get_cell_state(this_board->data[i][j]) == ALIVE) {
-                if (living_hood == 2 || living_hood == 3) {
-                    alive_cells[i*this_board->x_axis + j] = ALIVE;
-                }
-            }
-            else {
-                if (living_hood == 3) {
-                    alive_cells[i*this_board->x_axis + j] = ALIVE;
-                }
-            }
+            printf("cell value: %d, thread: %ld\n", alive_cells[i*this_board->x_axis + j],
+                                                    (i*this_board->x_axis + j)%num_threads);
+            pthread_create(&t[(i*this_board->x_axis + j)%num_threads],
+                            NULL,
+                            parallel_rules,
+                            (void*) t_arg);
+        }
+    }
+
+    for (int64_t i = 0; i < this_board->y_axis; i++) {
+        for (int64_t j = 0; j < this_board->x_axis; j++) {
+            void* return_aux;
+            pthread_join(t[(i*this_board->x_axis + j)%num_threads], &return_aux);
+            alive_cells[i*this_board->x_axis + j] = (cellState)return_aux;
         }
     }
 
@@ -117,4 +129,24 @@ void update_board_state(Board * this_board, cellState* living_cells) {
         int64_t cur_cell_x = i % this_board->x_axis;
         set_cell_state(this_board->data[cur_cell_y][cur_cell_x], living_cells[i]);
     }
+}
+
+void* parallel_rules(void* arg){
+    Thread_arg * t_arg = (Thread_arg *)arg;
+    free(arg);
+
+    int8_t living_hood = num_cell_hood(t_arg->this_board->data[t_arg->i][t_arg->j]);
+
+    if (get_cell_state(t_arg->this_board->data[t_arg->i][t_arg->j]) == ALIVE) {
+        if (living_hood == 2 || living_hood == 3) {
+            t_arg->alive_cell = ALIVE;
+        }
+    }
+    else {
+        if (living_hood == 3) {
+            t_arg->alive_cell = ALIVE;
+        }
+    }
+
+    return (void *)t_arg->alive_cell;
 }
