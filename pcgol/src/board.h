@@ -21,10 +21,8 @@ void update_board_state(Board * this_board, cellState* living_cells);
 cellState * new_cell_state_vec(int64_t size);
 
 typedef struct thread_arg {
-    Board* this_board;
-    cellState alive_cell;
-    int i;
-    int j;
+    Board* t_board;
+    cellState* t_cell_state_vec;
+    int offset;
+    int num_threads;
 } Thread_arg;
-
-void* parallel_rules(void* arg);

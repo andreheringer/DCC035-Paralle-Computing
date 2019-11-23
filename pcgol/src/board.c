@@ -90,63 +90,84 @@ void _compute_next_board_state(Board * this_board, cellState* alive_cells) {
 
     _kill_all(alive_cells, this_board->x_axis*this_board->x_axis);
 
-    //paralelismo
-    int num_threads = 2;
-    pthread_t t[num_threads];
-
     for (int64_t i = 0; i < this_board->y_axis; i++) {
         for (int64_t j = 0; j < this_board->x_axis; j++) {
-            Thread_arg* t_arg = (Thread_arg *)malloc(sizeof(Thread_arg));
-            t_arg->this_board = this_board;
-            t_arg->alive_cell = alive_cells[i*this_board->x_axis + j];
-            t_arg->i = i;
-            t_arg->j = j;
 
-            printf("cell value: %d, thread: %ld\n", alive_cells[i*this_board->x_axis + j],
-                                                    (i*this_board->x_axis + j)%num_threads);
-            pthread_create(&t[(i*this_board->x_axis + j)%num_threads],
-                            NULL,
-                            parallel_rules,
-                            (void*) t_arg);
-        }
-    }
-
-    for (int64_t i = 0; i < this_board->y_axis; i++) {
-        for (int64_t j = 0; j < this_board->x_axis; j++) {
-            void* return_aux;
-            pthread_join(t[(i*this_board->x_axis + j)%num_threads], &return_aux);
-            alive_cells[i*this_board->x_axis + j] = (cellState)return_aux;
+            int8_t living_hood = num_cell_hood(this_board->data[i][j]);
+            
+            if (get_cell_state(this_board->data[i][j]) == ALIVE) {
+                if (living_hood == 2 || living_hood == 3) {
+                    alive_cells[i*this_board->x_axis + j] = ALIVE;
+                }
+            }
+            else {
+                if (living_hood == 3) {
+                    alive_cells[i*this_board->x_axis + j] = ALIVE;
+                }
+            }
         }
     }
 
     return;
 }
 
+void* _parallel_compute_next_board_state(void* arg){
+    Thread_arg* targ = (Thread_arg*)arg;
+    free(arg);
+    Board* thread_board_ref = targ->t_board;
+    cellState * thread_cell_state_vec_ref = targ->t_cell_state_vec;
+    int offset = targ->offset;
+    int num_threads = targ->num_threads;
+    printf("thread %d\n", offset);
+
+    for (int64_t i = 0; i < thread_board_ref->y_axis; i++) {
+        for (int64_t j = offset; j < thread_board_ref->x_axis; j+=num_threads) {
+
+            int8_t living_hood = num_cell_hood(thread_board_ref->data[i][j]);
+            
+            if (get_cell_state(thread_board_ref->data[i][j]) == ALIVE) {
+                if (living_hood == 2 || living_hood == 3) {
+                    thread_cell_state_vec_ref[i*thread_board_ref->x_axis + j] = ALIVE;
+                }
+            }
+            else {
+                if (living_hood == 3) {
+                    thread_cell_state_vec_ref[i*thread_board_ref->x_axis + j] = ALIVE;
+                }
+            }
+        }
+    }
+
+    return NULL;
+}
+
 void update_board_state(Board * this_board, cellState* living_cells) {
-    _compute_next_board_state(this_board, living_cells);
+    //sequencial
+    //_compute_next_board_state(this_board, living_cells);
+
+    //paralelo
+    int num_threads = 2;
+    pthread_t t[num_threads];
+
+    for(int i = 0; i < num_threads; i++){
+        Thread_arg* targ = (Thread_arg *)malloc(sizeof(Thread_arg));
+        targ->t_board = this_board;
+        targ->t_cell_state_vec = living_cells;
+        targ->offset = i;
+        targ->num_threads = num_threads;
+
+        printf("criando thread %d\n", i);
+        pthread_create(&t[i], NULL, _parallel_compute_next_board_state, (void *)targ);
+    }
+
+    for(int i = 0; i < num_threads; i++){
+        printf("join thread %d\n", i);
+        pthread_join(t[i], NULL);
+    }
+
     for (int64_t i = 0; i < this_board->x_axis*this_board->x_axis; i++) {
         int64_t cur_cell_y = i / this_board->y_axis;
         int64_t cur_cell_x = i % this_board->x_axis;
         set_cell_state(this_board->data[cur_cell_y][cur_cell_x], living_cells[i]);
     }
-}
-
-void* parallel_rules(void* arg){
-    Thread_arg * t_arg = (Thread_arg *)arg;
-    free(arg);
-
-    int8_t living_hood = num_cell_hood(t_arg->this_board->data[t_arg->i][t_arg->j]);
-
-    if (get_cell_state(t_arg->this_board->data[t_arg->i][t_arg->j]) == ALIVE) {
-        if (living_hood == 2 || living_hood == 3) {
-            t_arg->alive_cell = ALIVE;
-        }
-    }
-    else {
-        if (living_hood == 3) {
-            t_arg->alive_cell = ALIVE;
-        }
-    }
-
-    return (void *)t_arg->alive_cell;
 }
