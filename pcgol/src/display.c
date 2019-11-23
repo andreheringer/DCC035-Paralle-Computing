@@ -52,10 +52,8 @@ void drawBoard() {
     //actually pode até ser paralelisado
     for (int i = 0; i < glob_board->y_axis; i++) {
         for (int j = 0; j < glob_board->x_axis; j++) {
-            //constrói o board de baixo pra cima (padrão do glut)
-            //mudar caso necessário
             drawCell((WINDOW_WIDTH - WINDOW_HEIGHT)/2 + WINDOW_HEIGHT%glob_board->y_axis/2 + j*cellSize,
-                     WINDOW_HEIGHT%glob_board->y_axis/2 + i*cellSize,
+                     WINDOW_HEIGHT - (WINDOW_HEIGHT%glob_board->y_axis/2 + (i+1)*cellSize),
                      get_cell_state(glob_board->data[i][j]) ? true : false);
         }
     }
