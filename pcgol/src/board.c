@@ -110,6 +110,33 @@ void _compute_next_board_state(Board * this_board, cellState* alive_cells) {
     return;
 }
 
+void* _parallel_compute_next_board_state(void* arg) {
+    Thread_arg* targ = (Thread_arg*)arg;
+    Board* thread_board_ref = targ->t_board;
+    cellState * thread_cell_state_vec_ref = targ->t_cell_state_vec;
+    int offset = targ->offset;
+    int num_threads = targ->num_threads;
+    
+    for (int64_t i = 0; i < thread_board_ref->y_axis; i++) {
+        for (int64_t j = offset; j < thread_board_ref->x_axis; j+=num_threads) {
+            
+            int8_t living_hood = num_cell_hood(thread_board_ref->data[i][j]);
+            
+            if (get_cell_state(thread_board_ref->data[i][j]) == ALIVE) {
+                if (living_hood == 2 || living_hood == 3) {
+                    thread_cell_state_vec_ref[i*thread_board_ref->x_axis + j] = ALIVE;
+                }
+            }
+            else {
+                if (living_hood == 3) {
+                    thread_cell_state_vec_ref[i*thread_board_ref->x_axis + j] = ALIVE;
+                }
+            }
+        }
+    }
+    return NULL;
+}
+
 void update_board_state(Board * this_board, cellState* living_cells) {
     _compute_next_board_state(this_board, living_cells);
     for (int64_t i = 0; i < len(living_cells); i++) {
@@ -117,5 +144,5 @@ void update_board_state(Board * this_board, cellState* living_cells) {
         int64_t cur_cell_x = i % this_board->x_axis;
         set_cell_state(this_board->data[cur_cell_y][cur_cell_x], living_cells[i]);
     }
-    
+    return;
 }
