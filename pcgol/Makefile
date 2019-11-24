@@ -2,7 +2,7 @@
 
 CC = gcc
  
-CFLAGS = -g -std=c11 -Wall -Wextra -pedantic -lGL -lGLU -lglut
+CFLAGS = -g -std=c11 -Wall -Wextra -pedantic -pthread -lGL -lGLU -lglut
 
 RFLAGS = 
 

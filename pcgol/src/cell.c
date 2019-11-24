@@ -28,7 +28,7 @@ void set_cell_hood(cell * this_cell, cell * hood_cell, int8_t hood_pos) {
 }
 
 int8_t num_cell_hood(cell * this_cell) {
-    
+
     int8_t num = 0;
 
     for (int8_t i = 0; i < HOODLEN; i++) {
