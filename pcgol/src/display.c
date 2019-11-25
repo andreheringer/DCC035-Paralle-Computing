@@ -13,8 +13,8 @@ float timer = 0;
 int index = 0;
 
 //altura e largura da janela
-#define WINDOW_WIDTH 1000
-#define WINDOW_HEIGHT 800
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
 
 //taxa em que o board é desenhado na tela (frames por segundo)
 #define FPS 5
@@ -49,7 +49,7 @@ void drawBoard() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     //cor do board (rgb)
-    glColor3f(0.2, 0.8, 0.8);
+    glColor3f(0.1, 0.2, 0.6);
     glPointSize(1.0);
 
     //desenha o board
