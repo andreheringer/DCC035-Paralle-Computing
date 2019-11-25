@@ -42,3 +42,9 @@ int8_t num_cell_hood(cell * this_cell) {
 
     return num;
 }
+
+void clone_cell(cell *src, cell *dest) {
+    dest->pos_x = src->pos_x;
+    dest->pos_y = src->pos_y;
+    dest->state = src->state;
+}

@@ -28,3 +28,4 @@ void set_cell_state(cell * this_cell, cellState state);
 void destruct_cell(cell * this_cell);
 void set_cell_hood(cell * this_cell, cell * hood_cell, int8_t hood_pos);
 int8_t num_cell_hood(cell * this_cell);
+void clone_cell(cell *src, cell *dest);
