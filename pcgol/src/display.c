@@ -13,7 +13,7 @@
 #define WINDOW_HEIGHT 600
 
 //taxa em que o board é desenhado na tela (frames por segundo)
-#define FPS 5
+#define FPS 10
 
 //declaração global do board pois a função de display não aceita parâmetros
 Board* glob_board;

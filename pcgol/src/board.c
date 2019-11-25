@@ -89,6 +89,21 @@ void _kill_all(cellState* cells, int size) {
     }
 }
 
+void* _parallel_kill_all(void* arg) {
+    Thread_arg* targ = (Thread_arg*)arg;
+    Board* thread_board_ref = targ->t_board;
+    cellState* thread_cell_state_vec_ref = targ->t_cell_state_vec;
+    int offset = targ->offset;
+    int num_threads = targ->num_threads;
+
+    for (int i = offset; i < thread_board_ref->x_axis*thread_board_ref->x_axis; i+=num_threads) {
+        thread_cell_state_vec_ref[i] = DEAD;
+    }
+
+    free(arg);
+    return NULL;
+}
+
 void _compute_next_board_state(Board * this_board, cellState* alive_cells) {
 
     _kill_all(alive_cells, this_board->x_axis*this_board->x_axis);
@@ -167,7 +182,19 @@ void update_board_state(Board* this_board, cellState* living_cells) {
         //paralelo
         pthread_t t[num_threads];
 
-        _kill_all(living_cells, this_board->x_axis*this_board->x_axis);
+        for(int i = 0; i < num_threads; i++){
+            Thread_arg* targ = (Thread_arg *)malloc(sizeof(Thread_arg));
+            targ->t_board = this_board;
+            targ->t_cell_state_vec = living_cells;
+            targ->offset = i;
+            targ->num_threads = num_threads;
+
+            pthread_create(&t[i], NULL, _parallel_kill_all, (void *)targ);
+        }
+
+        for(int i = 0; i < num_threads; i++){
+            pthread_join(t[i], NULL);
+        }
 
         for(int i = 0; i < num_threads; i++){
             Thread_arg* targ = (Thread_arg *)malloc(sizeof(Thread_arg));
