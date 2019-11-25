@@ -4,10 +4,9 @@
 
 #define HOODLEN 8
 
-typedef enum  cellState {
+typedef enum cellState {
     DEAD,
     ALIVE,
-    //SELECTED
 } cellState;
 
 typedef struct cell {

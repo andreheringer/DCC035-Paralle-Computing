@@ -5,12 +5,16 @@
 #include <time.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <sys/time.h>
 #include "display.h"
 #include "board.h"
 
+float timer = 0;
+int index = 0;
+
 //altura e largura da janela
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
+#define WINDOW_WIDTH 1000
+#define WINDOW_HEIGHT 800
 
 //taxa em que o board é desenhado na tela (frames por segundo)
 #define FPS 5
@@ -75,10 +79,26 @@ void drawCell(int x, int y, bool active) {
 }
 
 void refresh(){
+    struct timeval start_time;
+    gettimeofday(&start_time, NULL);
+
     glutPostRedisplay();
     glutTimerFunc(1000/FPS, refresh, 0);
 
     update_board_state(glob_board, glob_cell_state_vec);
+
+    struct timeval end_time;
+    gettimeofday(&end_time, NULL);
+
+    printf("%.6f\n", ((end_time.tv_sec - start_time.tv_sec) * 1000000u + end_time.tv_usec - start_time.tv_usec) / 1e6);
+
+    if(index < 30){
+        timer += ((end_time.tv_sec - start_time.tv_sec) * 1000000u + end_time.tv_usec - start_time.tv_usec) / 1e6;
+        index++;
+    } else {
+        printf("media: %f\n", timer/index);
+        exit(1);
+    }
 }
 
 void fillBoard(){
