@@ -260,6 +260,12 @@ void update_board_state(Board *this_board, cellState *living_cells, int rank) {
         }
         
         if (rank == 1) {
+            MPI_Recv((void *)hot_receive, this_board->y_axis, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            hot_edge = _deparse_hot_edge(this_board->y_axis, hot_receive);
+            _link_hot_edge(this_board, hot_edge, rank);
+        }
+                
+        if (rank == 1) {
             hot_send = _parse_hot_edge(this_board, rank);
             MPI_Send((void *)hot_send, this_board->y_axis, MPI_INT, 0, 0, MPI_COMM_WORLD);
         }
@@ -270,11 +276,6 @@ void update_board_state(Board *this_board, cellState *living_cells, int rank) {
             _link_hot_edge(this_board, hot_edge, rank);
         }
 
-        if (rank == 1) {
-            MPI_Recv((void *)hot_receive, this_board->y_axis, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            hot_edge = _deparse_hot_edge(this_board->y_axis, hot_receive);
-            _link_hot_edge(this_board, hot_edge, rank);
-        }        
 
         _parallel_conpute_next_board_state(this_board, living_cells, t);
         _parallel_set_board_cells(this_board, living_cells, t);
